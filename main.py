@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import random
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 def generate_password():
@@ -28,6 +29,14 @@ def save_credentials():
     user_id = email_used_entry.get()
     user_password = password_used_entry.get()
 
+    data_to_dict = {
+        website_name: {
+            "username": user_id,
+            "password": user_password
+        }
+
+    }
+
     if len(website_name) == 0 or len(user_id) == 0 or len(user_password) == 0:
         messagebox.showinfo(title="Something went wrong", message="Please make sure you haven't left any fiel empty")
     else:
@@ -36,11 +45,27 @@ def save_credentials():
                                             f"{user_id} \nPassword: {user_password}")
         
         if is_confirmed:
-            with open("data.txt", "a") as data_file:
-                data_file.write(f"{website_name} | {user_id} | {user_password}\n")
-                website_name_entry.delete(0, END)
-                email_used_entry.delete(0, END)
-                password_used_entry.delete(0, END)
+            try:
+                with open("data.json", "r") as data_file:
+                    #Reading data from JSON file
+                    data = json.load(data_file)
+            except FileNotFoundError:
+                with open("data.json", "w") as data_file:
+                    print("Inside exception")
+                    #Saving updated data
+                    json.dump(data_to_dict, data_file, indent=4)
+            else:
+                    #Updating old data with new one
+                    data.update(data_to_dict)
+
+                    with open("data.json", "w") as data_file:
+                         json.dump(data_to_dict, data_file, indent=4)
+            finally:
+                    print("on finally")
+                    #Clearing the fields out for next entry
+                    website_name_entry.delete(0, END)
+                    email_used_entry.delete(0, END)
+                    password_used_entry.delete(0, END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
