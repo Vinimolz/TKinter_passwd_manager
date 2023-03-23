@@ -23,6 +23,32 @@ def generate_password():
     password = "".join(password_list)
     password_used_entry.insert(0, password)
 
+def search_credentials():
+     website_name = website_name_entry.get()
+     #try: open the file
+
+     try:
+        with open("data.json", "r") as data_file:
+            data = json.load(data_file)
+
+     except FileNotFoundError: 
+        messagebox.showinfo(title="Warning", message="No credentials were saved to the password manager yet")
+     
+     else:
+         user_credentials = data.get(website_name)
+         if user_credentials:
+            user_Id = user_credentials.get("username")
+            user_password = user_credentials.get("password")
+            messagebox.showinfo(title=f"Website: {website_name}", message=f"Username: {user_Id} \nPassoword: {user_password}")
+         else:
+            messagebox.showinfo(title="Error", message="Website does not exist.")
+    
+     finally: 
+        # Clearing the fields out for next entry
+        website_name_entry.delete(0, END)
+        email_used_entry.delete(0, END)
+        password_used_entry.delete(0, END)         
+
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save_credentials():
     website_name = website_name_entry.get()
@@ -51,21 +77,19 @@ def save_credentials():
                     data = json.load(data_file)
             except FileNotFoundError:
                 with open("data.json", "w") as data_file:
-                    print("Inside exception")
                     #Saving updated data
                     json.dump(data_to_dict, data_file, indent=4)
             else:
-                    #Updating old data with new one
-                    data.update(data_to_dict)
+                #Updating old data with new one
+                data.update(data_to_dict)
 
-                    with open("data.json", "w") as data_file:
-                         json.dump(data_to_dict, data_file, indent=4)
+                with open("data.json", "w") as data_file:
+                    json.dump(data_to_dict, data_file, indent=4)
             finally:
-                    print("on finally")
-                    #Clearing the fields out for next entry
-                    website_name_entry.delete(0, END)
-                    email_used_entry.delete(0, END)
-                    password_used_entry.delete(0, END)
+                #Clearing the fields out for next entry
+                website_name_entry.delete(0, END)
+                email_used_entry.delete(0, END)
+                password_used_entry.delete(0, END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -91,8 +115,8 @@ password_used_label = Label(text="Password:")
 password_used_label.grid(row=3, column=0)
 
 #Creating all the etries and setting up grid location
-website_name_entry = Entry(width=41)
-website_name_entry.grid(row=1, column=1, columnspan=2)
+website_name_entry = Entry(width=24)
+website_name_entry.grid(row=1, column=1)
 website_name_entry.focus()
 
 email_used_entry = Entry(width=41)
@@ -108,4 +132,6 @@ generate_password_button.grid(row=3, column=2)
 add_entry_button = Button(text="Add", width=35, command=save_credentials)
 add_entry_button.grid(row=4, column=1, columnspan=2)
 
+search_website_button = Button(text="Search", width=13, command=search_credentials)
+search_website_button.grid(row=1, column=2)
 window.mainloop()
